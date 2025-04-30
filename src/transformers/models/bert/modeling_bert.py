@@ -56,7 +56,7 @@ from ...utils import (
     replace_return_docstrings,
 )
 from .configuration_bert import BertConfig
-
+import transformer_engine.pytorch as te
 
 logger = logging.get_logger(__name__)
 
@@ -161,12 +161,14 @@ class BertEmbeddings(nn.Module):
 
     def __init__(self, config):
         super().__init__()
+    
         self.word_embeddings = nn.Embedding(config.vocab_size, config.hidden_size, padding_idx=config.pad_token_id)
         self.position_embeddings = nn.Embedding(config.max_position_embeddings, config.hidden_size)
         self.token_type_embeddings = nn.Embedding(config.type_vocab_size, config.hidden_size)
 
         # self.LayerNorm is not snake-cased to stick with TensorFlow model variable name and be able to load
         # any TensorFlow checkpoint file
+        
         self.LayerNorm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         # position_ids (1, len position emb) is contiguous in memory and exported when serialized
@@ -554,6 +556,49 @@ class BertOutput(nn.Module):
         hidden_states = self.LayerNorm(hidden_states + input_tensor)
         return hidden_states
 
+class TEBertLayer(te.TransformerLayer):
+    def __init__(self, config):
+        super().__init__(
+            hidden_size=config.hidden_size,
+            ffn_hidden_size=config.intermediate_size,
+            num_attention_heads=config.num_attention_heads,
+            layernorm_epsilon=config.layer_norm_eps,
+            hidden_dropout=config.hidden_dropout_prob,
+            attention_dropout=config.attention_probs_dropout_prob,
+            layer_number=None,
+            layer_type="encoder",
+            self_attn_mask_type="padding",
+            activation="gelu",
+            attn_input_format="bshd",
+            # seq_length=config.seq_length,
+            micro_batch_size=config.micro_batch_size,
+            num_gqa_groups=config.num_attention_heads,
+            fuse_qkv_params=False,
+        )
+        self.is_decoder = config.is_decoder
+        self.add_cross_attention = config.add_cross_attention
+       
+
+    def forward(
+        self,
+        hidden_states: torch.Tensor,
+        attention_mask: Optional[torch.FloatTensor] = None,
+        head_mask: Optional[torch.FloatTensor] = None,
+        encoder_hidden_states: Optional[torch.FloatTensor] = None,
+        encoder_attention_mask: Optional[torch.FloatTensor] = None,
+        past_key_value: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
+        output_attentions: Optional[bool] = False,
+    ) -> Tuple[torch.Tensor]:
+        outputs = (super().forward(
+                hidden_states=hidden_states,
+                attention_mask=attention_mask,
+                self_attn_mask_type="no_mask",
+            ), # I want this to be (12, 2048, 256)
+        )
+        # outputs = outputs[1:]
+        return outputs
+
+
 
 class BertLayer(nn.Module):
     def __init__(self, config):
@@ -645,13 +690,16 @@ class BertEncoder(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.config = config
-        self.layer = nn.ModuleList([BertLayer(config) for _ in range(config.num_hidden_layers)])
+        if self.config.use_te_layers:
+            self.layer = nn.ModuleList([TEBertLayer(config) for _ in range(config.num_hidden_layers)])
+        else:
+            self.layer = nn.ModuleList([BertLayer(config) for _ in range(config.num_hidden_layers)])
         self.gradient_checkpointing = False
 
     def forward(
         self,
         hidden_states: torch.Tensor,
-        attention_mask: Optional[torch.FloatTensor] = None,
+        attention_mask: Optional[torch.FloatTensor] = None, # NOTE Why is my attention mask none?
         head_mask: Optional[torch.FloatTensor] = None,
         encoder_hidden_states: Optional[torch.FloatTensor] = None,
         encoder_attention_mask: Optional[torch.FloatTensor] = None,
@@ -968,8 +1016,8 @@ class BertModel(BertPreTrainedModel):
     to `True`. To be used in a Seq2Seq model, the model needs to initialized with both `is_decoder` argument and
     `add_cross_attention` set to `True`; an `encoder_hidden_states` is then expected as an input to the forward pass.
     """
-
-    _no_split_modules = ["BertEmbeddings", "BertLayer"]
+    # TODO(@jomitchell) Can start swapping layers here for TE layers.
+    _no_split_modules = ["BertEmbeddings", "BertLayer", "TEBertLayer"]
 
     def __init__(self, config, add_pooling_layer=True):
         super().__init__(config)
@@ -2012,6 +2060,7 @@ __all__ = [
     "BertForSequenceClassification",
     "BertForTokenClassification",
     "BertLayer",
+    "TEBertLayer",
     "BertLMHeadModel",
     "BertModel",
     "BertPreTrainedModel",
