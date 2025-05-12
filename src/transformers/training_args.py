@@ -1846,6 +1846,7 @@ class TrainingArguments:
         if isinstance(self.fsdp, bool):
             self.fsdp = [FSDPOption.FULL_SHARD] if self.fsdp else ""
         if isinstance(self.fsdp, str):
+            print(f"self.fsdp: {self.fsdp}")
             self.fsdp = [FSDPOption(s) for s in self.fsdp.split()]
         if self.fsdp == [FSDPOption.OFFLOAD]:
             raise ValueError(

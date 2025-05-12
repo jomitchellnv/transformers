@@ -2153,6 +2153,7 @@ class Trainer:
             kwargs (`Dict[str, Any]`, *optional*):
                 Additional keyword arguments used to hide deprecated arguments
         """
+        # print(f"--- About to call trainer.train() (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         if resume_from_checkpoint is False:
             resume_from_checkpoint = None
 
@@ -2246,6 +2247,7 @@ class Trainer:
     def _inner_training_loop(
         self, batch_size=None, args=None, resume_from_checkpoint=None, trial=None, ignore_keys_for_eval=None
     ):
+        # print(f"--- About to call _inner_training_loop (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         self.accelerator.free_memory()
         self._train_batch_size = batch_size
         if self.args.auto_find_batch_size:
@@ -2265,6 +2267,7 @@ class Trainer:
             self.state.train_batch_size = self._train_batch_size
         logger.debug(f"Currently training with a batch size of: {self._train_batch_size}")
         # Data loader and number of training steps
+        # print(f"--- About to call get_train_dataloader (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         train_dataloader = self.get_train_dataloader()
         if self.is_fsdp_xla_v2_enabled:
             train_dataloader = tpu_spmd_dataloader(train_dataloader)
@@ -2273,6 +2276,7 @@ class Trainer:
         # number of training epochs: num_train_epochs
         # number of training steps per epoch: num_update_steps_per_epoch
         # total number of training steps to execute: max_steps
+        # print(f"--- About to call set_initial_training_values (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         total_train_batch_size = self._train_batch_size * args.gradient_accumulation_steps * args.world_size
         (
             num_train_epochs,
@@ -2284,6 +2288,7 @@ class Trainer:
             max_steps,
         ) = self.set_initial_training_values(args, train_dataloader, total_train_batch_size)
 
+        # print(f"--- About to call num_tokens (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         num_train_tokens = None
         if self.args.include_tokens_per_second:
             num_train_tokens = self.num_tokens(train_dataloader, None if epoch_based else max_steps)
@@ -2332,24 +2337,27 @@ class Trainer:
         self.state.train_batch_size = self._train_batch_size
 
         # Compute absolute values for logging, eval, and save if given as ratio
+        # print(f"--- About to call compute_steps (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         self.state.compute_steps(args, max_steps)
 
         # Activate gradient checkpointing if needed
         if args.gradient_checkpointing:
             self.model.gradient_checkpointing_enable(gradient_checkpointing_kwargs=args.gradient_checkpointing_kwargs)
 
+        # print(f"--- About to call _wrap_model (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         model = self._wrap_model(self.model_wrapped)
 
         # as the model is wrapped, don't use `accelerator.prepare`
         # this is for unhandled cases such as
         # FSDP-XLA, SageMaker MP/DP, DataParallel, IPEX
         use_accelerator_prepare = True if model is self.model else False
-
+        # print(f"--- About to call use_accelerator_prepare (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         if use_accelerator_prepare and self.is_fsdp_enabled:
             # In case of auto_find_batch_size=True
             # Remove FSDP wrapping from sub-models.
             self.model = unwrap_model(self.model, recursive=True)
 
+        # print(f"--- About to call delay_optimizer_creation (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         if delay_optimizer_creation:
             if use_accelerator_prepare:
                 # configure fsdp plugin for qlora if any
@@ -2359,8 +2367,11 @@ class Trainer:
             self.create_optimizer_and_scheduler(num_training_steps=max_steps)
 
         # prepare using `accelerator` prepare
+        # print(f"--- About to call use_accelerator_prepare (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         if use_accelerator_prepare:
+            # print(f"--- About to call model.train() (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
             self.model.train()
+            # print(f"--- Called to call model.train() (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
             if hasattr(self.lr_scheduler, "step"):
                 if self.use_apex:
                     model = self.accelerator.prepare(self.model)
@@ -2373,32 +2384,45 @@ class Trainer:
                 )
         elif self.args.optim in [OptimizerNames.LOMO, OptimizerNames.ADALOMO]:
             # In this case we are in DDP + LOMO, which should be supported
+            # print(f"--- About to call self.accelerator.prepare (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
             self.optimizer = self.accelerator.prepare(self.optimizer)
 
         if self.is_fsdp_enabled:
+            # print(f"--- About to call self.model = self.model_wrapped = model (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
             self.model = self.model_wrapped = model
+            # print(f"--- Called to call self.model = self.model_wrapped = model (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
 
         # for the rest of this function `model` is the outside model, whether it was wrapped or not
         if model is not self.model:
+            # print(f"--- About to call self.model_wrapped = model (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
             self.model_wrapped = model
+            # print(f"--- Called to call self.model_wrapped = model (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
 
         # backward compatibility
         if self.is_deepspeed_enabled:
+            # print(f"--- About to call self.deepspeed = self.model_wrapped (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
             self.deepspeed = self.model_wrapped
+            # print(f"--- Called to call self.deepspeed = self.model_wrapped (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
 
         # ckpt loading
         if resume_from_checkpoint is not None:
+            # print(f"--- About to call self.is_deepspeed_enabled (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
             if self.is_deepspeed_enabled:
+                # print(f"--- About to call deepspeed_load_checkpoint (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                 deepspeed_load_checkpoint(
                     self.model_wrapped, resume_from_checkpoint, load_module_strict=not _is_peft_model(self.model)
                 )
             elif is_sagemaker_mp_enabled() or self.is_fsdp_enabled:
+                # print(f"--- About to call self._load_from_checkpoint (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                 self._load_from_checkpoint(resume_from_checkpoint, self.model_wrapped)
+                # print(f"--- Called to call self._load_from_checkpoint (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
 
         # Check if saved optimizer or scheduler states exist
+        # print(f"--- About to call self._load_optimizer_and_scheduler (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         self._load_optimizer_and_scheduler(resume_from_checkpoint)
+        # print(f"--- Called to call self._load_optimizer_and_scheduler (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         self._load_scaler(resume_from_checkpoint)
-
+        # print(f"--- Called to call self._load_scaler (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         # important: at this point:
         # self.model         is the Transformers Model
         # self.model_wrapped is DDP(Transformers Model), Deepspeed(Transformers Model),
@@ -2415,12 +2439,13 @@ class Trainer:
         logger.info(f"  Gradient Accumulation steps = {args.gradient_accumulation_steps}")
         logger.info(f"  Total optimization steps = {max_steps:,}")
         logger.info(f"  Number of trainable parameters = {get_model_param_count(model, trainable_only=True):,}")
-
+        
         self.state.epoch = 0
         start_time = time.time()
         epochs_trained = 0
         steps_trained_in_current_epoch = 0
         steps_trained_progress_bar = None
+        # print(f"--- About to call self.state.epoch = 0 (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
 
         # Check if continuing training from a checkpoint
         if resume_from_checkpoint is not None and os.path.isfile(
@@ -2465,14 +2490,20 @@ class Trainer:
         if args.eval_on_start:
             self._evaluate(trial, ignore_keys_for_eval, skip_scheduler=True)
 
+        # print(f"--- About to call for epoch in range(epochs_trained, num_train_epochs) (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         for epoch in range(epochs_trained, num_train_epochs):
+            # print(f"--- About to call epoch_dataloader = train_dataloader (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
             epoch_dataloader = train_dataloader
             if hasattr(epoch_dataloader, "set_epoch"):
+                # print(f"--- About to call epoch_dataloader.set_epoch(epoch) (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                 epoch_dataloader.set_epoch(epoch)
+                # print(f"--- Called to call epoch_dataloader.set_epoch(epoch) (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
 
             # Reset the past mems state at the beginning of each epoch if necessary.
             if args.past_index >= 0:
+                # print(f"--- About to call self._past = None (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                 self._past = None
+                # print(f"--- Called to call self._past = None (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
 
             steps_in_epoch = (
                 len(epoch_dataloader)
@@ -2483,7 +2514,9 @@ class Trainer:
 
             if epoch == epochs_trained and resume_from_checkpoint is not None and steps_trained_in_current_epoch == 0:
                 self._load_rng_state(resume_from_checkpoint)
+                # print(f"--- Called to call self._load_rng_state(resume_from_checkpoint) (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
 
+            # print(f"--- About to call rng_to_sync = False (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
             rng_to_sync = False
             steps_skipped = 0
             if steps_trained_in_current_epoch > 0:
@@ -2494,6 +2527,7 @@ class Trainer:
 
             step = -1
             epoch_iterator = iter(epoch_dataloader)
+            # print(f"--- About to call epoch_iterator = iter(epoch_dataloader) (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
             # We chunkify the epoch iterator into gradient accumulation steps `n` batches
             remainder = num_examples % args.gradient_accumulation_steps
             if remainder == 0:
@@ -2503,16 +2537,25 @@ class Trainer:
             if args.gradient_accumulation_steps == 1:
                 total_updates -= 1
             for _ in range(total_updates):
+                # print(f"--- About to call update_step += 1 (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                 update_step += 1
+                # print(f"--- About to call num_batches = args.gradient_accumulation_steps if update_step != (total_updates - 1) else remainder (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                 num_batches = args.gradient_accumulation_steps if update_step != (total_updates - 1) else remainder
+                # print(f"--- About to call batch_samples, num_items_in_batch = self.get_batch_samples(epoch_iterator, num_batches, args.device) (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                 batch_samples, num_items_in_batch = self.get_batch_samples(epoch_iterator, num_batches, args.device)
+                # print(f"--- About to call batch_samples, num_items_in_batch = self.get_batch_samples(epoch_iterator, num_batches, args.device) (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                 for i, inputs in enumerate(batch_samples):
                     step += 1
+                    # print(f"--- About to call step += 1 (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                     do_sync_step = (step + 1) % args.gradient_accumulation_steps == 0 or (step + 1) == steps_in_epoch
                     # Since we perform prefetching, we need to manually set sync_gradients
+                    # print(f"--- About to call self.accelerator.gradient_state._set_sync_gradients(do_sync_step) (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                     self.accelerator.gradient_state._set_sync_gradients(do_sync_step)
+                    # print(f"--- Called to call self.accelerator.gradient_state._set_sync_gradients(do_sync_step) (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
 
+                    # print(f"--- About to call self.args.include_num_input_tokens_seen (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                     if self.args.include_num_input_tokens_seen:
+                        # print(f"--- About to call main_input_name = getattr(self.model, 'main_input_name', 'input_ids') (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                         main_input_name = getattr(self.model, "main_input_name", "input_ids")
                         if main_input_name not in inputs:
                             logger.warning(
@@ -2524,7 +2567,9 @@ class Trainer:
                             input_tokens = inputs[main_input_name].numel()
                             input_tokens = torch.tensor(input_tokens, device=self.args.device, dtype=torch.int64)
                             self.state.num_input_tokens_seen += self.accelerator.gather(input_tokens).sum().item()
+                    # print(f"--- About to call if rng_to_sync: (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                     if rng_to_sync:
+                        # print(f"--- About to call self._load_rng_state(resume_from_checkpoint) (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                         self._load_rng_state(resume_from_checkpoint)
                         rng_to_sync = False
 
@@ -2543,6 +2588,7 @@ class Trainer:
                     if step % args.gradient_accumulation_steps == 0:
                         self.control = self.callback_handler.on_step_begin(args, self.state, self.control)
 
+                    # print(f"--- About to call context = ( (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                     # We explicitly want to avoid relying on `accelerator.accumulate` for generation training
                     context = (
                         functools.partial(self.accelerator.no_sync, model=model)
@@ -2550,9 +2596,11 @@ class Trainer:
                         and self.accelerator.distributed_type != DistributedType.DEEPSPEED
                         else contextlib.nullcontext
                     )
+                    # print(f"--- About to call with context(): (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                     with context():
+                        # print(f"--- About to call tr_loss_step = self.training_step(model, inputs, num_items_in_batch) (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                         tr_loss_step = self.training_step(model, inputs, num_items_in_batch)
-
+                    # print(f"--- past context() piece ( (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                     if (
                         args.logging_nan_inf_filter
                         and not is_torch_xla_available()
@@ -2566,9 +2614,10 @@ class Trainer:
                                 f"Calculated loss must be on the original device: {tr_loss.device} but device in use is {tr_loss_step.device}"
                             )
                         tr_loss = tr_loss + tr_loss_step
-
+                    # print(f"--- About to call self.current_flos += float(self.floating_point_ops(inputs)) (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                     self.current_flos += float(self.floating_point_ops(inputs))
 
+                    # print(f"--- About to call do_sync_step (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
                     if do_sync_step:
                         # Since we perform prefetching, we need to manually set sync_gradients to True
                         self.accelerator.gradient_state._set_sync_gradients(True)
@@ -2672,6 +2721,7 @@ class Trainer:
             # Clean the state at the end of training
             delattr(self, "_past")
 
+        # print(f"--- About to Training completedl... (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         logger.info("\n\nTraining completed. Do not forget to share your model on huggingface.co/models =)\n\n")
         if args.load_best_model_at_end and self.state.best_model_checkpoint is not None:
             # Wait for everyone to get here so we are sure the model has been saved by process 0.
@@ -2725,6 +2775,7 @@ class Trainer:
         # for the embedding layer by removing the forward post hook.
         if self.neftune_noise_alpha is not None:
             self._deactivate_neftune(self.model)
+        # print(f"--- About to call return TrainOutput (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
 
         return TrainOutput(self.state.global_step, train_loss, metrics)
 
@@ -3730,7 +3781,9 @@ class Trainer:
         Return:
             `torch.Tensor`: The tensor with training loss on this batch.
         """
+        # print('model', model)
         model.train()
+        # print(f"--- Called to call model.train() (PID: {os.getpid()}) ---") # Optional: Add print here too # Removed comment
         if hasattr(self.optimizer, "train") and callable(self.optimizer.train):
             self.optimizer.train()
 
