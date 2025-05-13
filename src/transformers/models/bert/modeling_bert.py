@@ -557,7 +557,7 @@ class BertOutput(nn.Module):
         return hidden_states
 
 class TEBertLayer(te.TransformerLayer):
-    def __init__(self, config):
+    def __init__(self, config, layer_number=None):
         super().__init__(
             hidden_size=config.hidden_size,
             ffn_hidden_size=config.intermediate_size,
@@ -565,7 +565,7 @@ class TEBertLayer(te.TransformerLayer):
             layernorm_epsilon=config.layer_norm_eps,
             hidden_dropout=config.hidden_dropout_prob,
             attention_dropout=config.attention_probs_dropout_prob,
-            layer_number=None,
+            layer_number=layer_number,
             layer_type="encoder",
             self_attn_mask_type="padding",
             activation="gelu",
@@ -691,7 +691,7 @@ class BertEncoder(nn.Module):
         super().__init__()
         self.config = config
         if self.config.use_te_layers:
-            self.layer = nn.ModuleList([TEBertLayer(config) for _ in range(config.num_hidden_layers)])
+            self.layer = nn.ModuleList([TEBertLayer(config, layer_number=i) for i in range(config.num_hidden_layers)])
         else:
             self.layer = nn.ModuleList([BertLayer(config) for _ in range(config.num_hidden_layers)])
         self.gradient_checkpointing = False
