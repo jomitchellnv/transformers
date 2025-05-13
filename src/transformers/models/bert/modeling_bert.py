@@ -691,7 +691,7 @@ class BertEncoder(nn.Module):
         super().__init__()
         self.config = config
         if self.config.use_te_layers:
-            self.layer = nn.ModuleList([TEBertLayer(config, layer_number=i) for i in range(config.num_hidden_layers)])
+            self.layer = nn.ModuleList([TEBertLayer(config, layer_number=i+1) for i in range(config.num_hidden_layers)])
         else:
             self.layer = nn.ModuleList([BertLayer(config) for _ in range(config.num_hidden_layers)])
         self.gradient_checkpointing = False
