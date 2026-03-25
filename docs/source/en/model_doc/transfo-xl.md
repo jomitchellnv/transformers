@@ -23,14 +23,14 @@ rendered properly in your Markdown viewer.
 
 <Tip warning={true}>
 
-This model is in maintenance mode only, so we won't accept any new PRs changing its code. This model was deprecated due to security issues linked to `pickle.load`.
+This model is in maintenance mode only, so we won't accept any new PRs changing its code. This model was deprecated due to security issues linked to `pickle.load_REMOVED`.
 
 We recommend switching to more recent models for improved security.
 
 In case you would still like to use `TransfoXL` in your experiments, we recommend using the [Hub checkpoint](https://huggingface.co/transfo-xl/transfo-xl-wt103) with a specific revision to ensure you are downloading safe files from the Hub.
 
 You will need to set the environment variable `TRUST_REMOTE_CODE` to `True` in order to allow the
-usage of `pickle.load()`:
+usage of `pickle.load_REMOVED()`:
 
 ```python
 import os

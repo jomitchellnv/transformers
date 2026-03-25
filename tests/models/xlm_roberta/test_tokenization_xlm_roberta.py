@@ -220,7 +220,7 @@ class XLMRobertaTokenizationTest(TokenizerTesterMixin, unittest.TestCase):
             shutil.copyfile(SAMPLE_VOCAB, f.name)
             tokenizer = XLMRobertaTokenizer(f.name, keep_accents=True)
             pickled_tokenizer = pickle.dumps(tokenizer)
-        pickle.loads(pickled_tokenizer)
+        pickle.load_REMOVEDs(pickled_tokenizer)
 
     def test_rust_and_python_full_tokenizers(self):
         if not self.test_rust_tokenizer:

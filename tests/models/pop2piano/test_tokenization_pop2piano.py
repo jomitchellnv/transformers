@@ -235,7 +235,7 @@ class Pop2PianoTokenizerTest(unittest.TestCase):
             pickle.dump(self.tokenizer, handle)
 
         with open(filename, "rb") as handle:
-            tokenizer_new = pickle.load(handle)
+            tokenizer_new = pickle.load_REMOVED(handle)
 
         subwords_loaded = tokenizer_new(notes)["token_ids"]
 

@@ -118,7 +118,7 @@ class BertJapaneseTokenizationTest(TokenizerTesterMixin, unittest.TestCase):
             pickle.dump(tokenizer, handle)
 
         with open(filename, "rb") as handle:
-            tokenizer_new = pickle.load(handle)
+            tokenizer_new = pickle.load_REMOVED(handle)
 
         tokens_loaded = tokenizer_new.tokenize(text)
 
@@ -214,7 +214,7 @@ class BertJapaneseTokenizationTest(TokenizerTesterMixin, unittest.TestCase):
             pickle.dump(tokenizer, handle)
 
         with open(filename, "rb") as handle:
-            tokenizer_new = pickle.load(handle)
+            tokenizer_new = pickle.load_REMOVED(handle)
 
         tokens_loaded = tokenizer_new.tokenize(text)
 
@@ -309,7 +309,7 @@ class BertJapaneseTokenizationTest(TokenizerTesterMixin, unittest.TestCase):
             pickle.dump(tokenizer, handle)
 
         with open(filename, "rb") as handle:
-            tokenizer_new = pickle.load(handle)
+            tokenizer_new = pickle.load_REMOVED(handle)
 
         tokens_loaded = tokenizer_new.tokenize(text)
 

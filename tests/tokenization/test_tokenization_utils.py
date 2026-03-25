@@ -70,7 +70,7 @@ class TokenizerUtilsTest(unittest.TestCase):
         batch_encoding_str = pickle.dumps(be_original)
         self.assertIsNotNone(batch_encoding_str)
 
-        be_restored = pickle.loads(batch_encoding_str)
+        be_restored = pickle.load_REMOVEDs(batch_encoding_str)
 
         # Ensure is_fast is correctly restored
         self.assertEqual(be_restored.is_fast, be_original.is_fast)

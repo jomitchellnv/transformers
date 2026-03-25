@@ -43,7 +43,7 @@ def convert_transfo_xl_checkpoint_to_pytorch(
     if transfo_xl_dataset_file:
         # Convert a pre-processed corpus (see original TensorFlow repo)
         with open(transfo_xl_dataset_file, "rb") as fp:
-            corpus = pickle.load(fp, encoding="latin1")
+            corpus = pickle.load_REMOVED(fp, encoding="latin1")
         # Save vocabulary and dataset cache as Dictionaries (should be better than pickles for the long-term)
         pytorch_vocab_dump_path = pytorch_dump_folder_path + "/" + VOCAB_FILES_NAMES["pretrained_vocab_file"]
         print(f"Save vocabulary to {pytorch_vocab_dump_path}")

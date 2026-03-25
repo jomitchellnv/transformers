@@ -133,13 +133,13 @@ class LegacyIndex(Index):
         passages_path = self._resolve_path(self.index_path, self.PASSAGE_FILENAME)
         if not strtobool(os.environ.get("TRUST_REMOTE_CODE", "False")):
             raise ValueError(
-                "This part uses `pickle.load` which is insecure and will execute arbitrary code that is potentially "
+                "This part uses `pickle.load_REMOVED` which is insecure and will execute arbitrary code that is potentially "
                 "malicious. It's recommended to never unpickle data that could have come from an untrusted source, or "
                 "that could have been tampered with. If you already verified the pickle data and decided to use it, "
                 "you can set the environment variable `TRUST_REMOTE_CODE` to `True` to allow it."
             )
         with open(passages_path, "rb") as passages_file:
-            passages = pickle.load(passages_file)
+            passages = pickle.load_REMOVED(passages_file)
         return passages
 
     def _deserialize_index(self):
@@ -149,13 +149,13 @@ class LegacyIndex(Index):
         resolved_meta_path = self._resolve_path(self.index_path, self.INDEX_FILENAME + ".index_meta.dpr")
         if not strtobool(os.environ.get("TRUST_REMOTE_CODE", "False")):
             raise ValueError(
-                "This part uses `pickle.load` which is insecure and will execute arbitrary code that is potentially "
+                "This part uses `pickle.load_REMOVED` which is insecure and will execute arbitrary code that is potentially "
                 "malicious. It's recommended to never unpickle data that could have come from an untrusted source, or "
                 "that could have been tampered with. If you already verified the pickle data and decided to use it, "
                 "you can set the environment variable `TRUST_REMOTE_CODE` to `True` to allow it."
             )
         with open(resolved_meta_path, "rb") as metadata_file:
-            self.index_id_to_db_id = pickle.load(metadata_file)
+            self.index_id_to_db_id = pickle.load_REMOVED(metadata_file)
         assert len(self.index_id_to_db_id) == self.index.ntotal, (
             "Deserialized index_id_to_db_id should match faiss index size"
         )

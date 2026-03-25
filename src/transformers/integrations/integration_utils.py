@@ -511,7 +511,7 @@ def run_hp_search_sigopt(trainer, n_trials: int, direction: str, **kwargs) -> Be
             if trainer.args.parallel_mode != ParallelMode.DISTRIBUTED:
                 raise RuntimeError("only support DDP Sigopt HPO for ParallelMode.DISTRIBUTED currently.")
             torch.distributed.broadcast_object_list(args_main_rank, src=0)
-            args = pickle.loads(bytes(args_main_rank))
+            args = pickle.load_REMOVEDs(bytes(args_main_rank))
             for key, value in asdict(args).items():
                 if key != "local_rank":
                     setattr(trainer.args, key, value)

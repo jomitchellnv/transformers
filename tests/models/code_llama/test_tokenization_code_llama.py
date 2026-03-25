@@ -299,7 +299,7 @@ class CodeLlamaTokenizationTest(TokenizerTesterMixin, unittest.TestCase):
             shutil.copyfile(SAMPLE_VOCAB, f.name)
             tokenizer = CodeLlamaTokenizer(f.name, keep_accents=True)
             pickled_tokenizer = pickle.dumps(tokenizer)
-        pickle.loads(pickled_tokenizer)
+        pickle.load_REMOVEDs(pickled_tokenizer)
 
     @unittest.skip(reason="worker 'gw4' crashed on CI, passing locally.")
     def test_pickle_subword_regularization_tokenizer(self):

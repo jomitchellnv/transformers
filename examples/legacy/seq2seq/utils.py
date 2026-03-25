@@ -445,9 +445,9 @@ def use_task_specific_params(model, task):
 
 
 def pickle_load(path):
-    """pickle.load(path)"""
+    """pickle.load_REMOVED(path)"""
     with open(path, "rb") as f:
-        return pickle.load(f)
+        return pickle.load_REMOVED(f)
 
 
 def pickle_save(obj, path):

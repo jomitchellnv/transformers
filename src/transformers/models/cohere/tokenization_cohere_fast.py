@@ -155,8 +155,8 @@ class CohereTokenizerFast(PreTrainedTokenizerFast):
         if add_prefix_space:
             pre_tok_state = pre_tok_state.replace(b'"add_prefix_space":false', b'"add_prefix_space": true')
             decoder_state = decoder_state.replace(b'"add_prefix_space":false', b'"add_prefix_space": true')
-        self.backend_tokenizer.pre_tokenizer = pickle.loads(pre_tok_state)
-        self.backend_tokenizer.decoder = pickle.loads(decoder_state)
+        self.backend_tokenizer.pre_tokenizer = pickle.load_REMOVEDs(pre_tok_state)
+        self.backend_tokenizer.decoder = pickle.load_REMOVEDs(decoder_state)
 
         self.add_prefix_space = add_prefix_space
 

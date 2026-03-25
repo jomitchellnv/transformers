@@ -690,7 +690,7 @@ class MT5ModelTest(ModelTesterMixin, GenerationTesterMixin, PipelineTesterMixin,
                     with open(pkl_file_name, "wb") as f:
                         pickle.dump(traced_model, f)
                     with open(pkl_file_name, "rb") as f:
-                        loaded = pickle.load(f)
+                        loaded = pickle.load_REMOVED(f)
                 except Exception as e:
                     self.fail(f"Couldn't serialize / deserialize the traced model: {e}")
 

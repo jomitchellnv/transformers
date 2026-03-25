@@ -181,7 +181,7 @@ class MoshiTokenizationTest(TokenizerTesterMixin, unittest.TestCase):
                 eos_token="</s>",
             )
             pickled_tokenizer = pickle.dumps(tokenizer)
-        pickle.loads(pickled_tokenizer)
+        pickle.load_REMOVEDs(pickled_tokenizer)
 
     def test_training_new_tokenizer(self):
         # This feature only exists for fast tokenizers

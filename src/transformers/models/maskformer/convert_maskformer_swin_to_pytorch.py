@@ -237,7 +237,7 @@ def convert_maskformer_checkpoint(
 
     # load original state_dict
     with open(checkpoint_path, "rb") as f:
-        data = pickle.load(f)
+        data = pickle.load_REMOVED(f)
     state_dict = data["model"]
 
     # for name, param in state_dict.items():

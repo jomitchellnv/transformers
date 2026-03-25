@@ -117,7 +117,7 @@ class RealmRetriever:
             )
         if not strtobool(os.environ.get("TRUST_REMOTE_CODE", "False")):
             raise ValueError(
-                "This part uses `pickle.load` which is insecure and will execute arbitrary code that is "
+                "This part uses `pickle.load_REMOVED` which is insecure and will execute arbitrary code that is "
                 "potentially malicious. It's recommended to never unpickle data that could have come from an "
                 "untrusted source, or that could have been tampered with. If you already verified the pickle "
                 "data and decided to use it, you can set the environment variable "

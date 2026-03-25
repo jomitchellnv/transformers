@@ -267,7 +267,7 @@ def convert_perceiver_checkpoint(pickle_file, pytorch_dump_folder_path, architec
 
     # load parameters as FlatMapping data structure
     with open(pickle_file, "rb") as f:
-        checkpoint = pickle.loads(f.read())
+        checkpoint = pickle.load_REMOVEDs(f.read())
 
     state = None
     if isinstance(checkpoint, dict) and architecture in [

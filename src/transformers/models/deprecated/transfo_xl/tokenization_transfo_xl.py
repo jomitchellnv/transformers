@@ -172,7 +172,7 @@ class TransfoXLTokenizer(PreTrainedTokenizer):
         **kwargs,
     ):
         logger.error(
-            "`TransfoXL` was deprecated due to security issues linked to `pickle.load` in `TransfoXLTokenizer`. "
+            "`TransfoXL` was deprecated due to security issues linked to `pickle.load_REMOVED` in `TransfoXLTokenizer`. "
             "See more details on this model's documentation page: "
             "`https://github.com/huggingface/transformers/blob/main/docs/source/en/model_doc/transfo-xl.md`."
         )
@@ -204,14 +204,14 @@ class TransfoXLTokenizer(PreTrainedTokenizer):
                 # Priority on pickle files (support PyTorch and TF)
                 if not strtobool(os.environ.get("TRUST_REMOTE_CODE", "False")):
                     raise ValueError(
-                        "This part uses `pickle.load` which is insecure and will execute arbitrary code that is "
+                        "This part uses `pickle.load_REMOVED` which is insecure and will execute arbitrary code that is "
                         "potentially malicious. It's recommended to never unpickle data that could have come from an "
                         "untrusted source, or that could have been tampered with. If you already verified the pickle "
                         "data and decided to use it, you can set the environment variable "
                         "`TRUST_REMOTE_CODE` to `True` to allow it."
                     )
                 with open(pretrained_vocab_file, "rb") as f:
-                    vocab_dict = pickle.load(f)
+                    vocab_dict = pickle.load_REMOVED(f)
 
                 # Loading a torch-saved transfo-xl vocab dict with pickle results in an integer
                 # Entering this if statement means that we tried to load a torch-saved file with pickle, and we failed.
@@ -793,13 +793,13 @@ def get_lm_corpus(datadir, dataset):
         logger.info("Loading cached dataset from pickle...")
         if not strtobool(os.environ.get("TRUST_REMOTE_CODE", "False")):
             raise ValueError(
-                "This part uses `pickle.load` which is insecure and will execute arbitrary code that is potentially "
+                "This part uses `pickle.load_REMOVED` which is insecure and will execute arbitrary code that is potentially "
                 "malicious. It's recommended to never unpickle data that could have come from an untrusted source, or "
                 "that could have been tampered with. If you already verified the pickle data and decided to use it, "
                 "you can set the environment variable `TRUST_REMOTE_CODE` to `True` to allow it."
             )
         with open(fn, "rb") as fp:
-            corpus = pickle.load(fp)
+            corpus = pickle.load_REMOVED(fp)
     else:
         logger.info(f"Producing dataset {dataset}...")
         kwargs = {}

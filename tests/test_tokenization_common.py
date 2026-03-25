@@ -537,7 +537,7 @@ class TokenizerTesterMixin:
         tokenizer = self.get_tokenizer(sp_model_kwargs=sp_model_kwargs)
         tokenizer_bin = pickle.dumps(tokenizer)
         del tokenizer
-        tokenizer_new = pickle.loads(tokenizer_bin)
+        tokenizer_new = pickle.load_REMOVEDs(tokenizer_bin)
 
         run_test_in_subprocess(
             test_case=self,
@@ -849,7 +849,7 @@ class TokenizerTesterMixin:
                     pickle.dump(tokenizer, handle)
 
                 with open(filename, "rb") as handle:
-                    tokenizer_new = pickle.load(handle)
+                    tokenizer_new = pickle.load_REMOVED(handle)
 
                 subwords_loaded = tokenizer_new.tokenize(text)
 
@@ -858,7 +858,7 @@ class TokenizerTesterMixin:
     @require_tokenizers
     def test_pickle_added_tokens(self):
         tok1 = AddedToken("<s>", rstrip=True, lstrip=True, normalized=False, single_word=True)
-        tok2 = pickle.loads(pickle.dumps(tok1))
+        tok2 = pickle.load_REMOVEDs(pickle.dumps(tok1))
 
         self.assertEqual(tok1.__getstate__(), tok2.__getstate__())
 
